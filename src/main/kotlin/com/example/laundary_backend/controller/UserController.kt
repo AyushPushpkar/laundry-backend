@@ -34,19 +34,19 @@ class UserController(private val userService: UserService) {
     }
 
     @GetMapping("/me")
-    fun getCurrentUser(): ResponseEntity<Any> {
+    fun getCurrentUser(): ResponseEntity<UserDTO> {
         val authentication = SecurityContextHolder.getContext().authentication
+
         println("Auth Object: $authentication")  // Debugging
         println("Authenticated Name (Email): ${authentication?.name}") // Debugging
 
         if (authentication == null || !authentication.isAuthenticated) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
-                mapOf("status" to "error", "message" to "User is not authenticated!")
-            )
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
 
         val email = authentication.name
         val user = userService.getUserByEmail(email)
+
         return ResponseEntity.ok(user)
     }
 
