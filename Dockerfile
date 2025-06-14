@@ -2,6 +2,11 @@
 FROM gradle:8.4.0-jdk17 AS build
 WORKDIR /app
 COPY --chown=gradle:gradle . .
+
+# ✅ Make gradlew executable
+RUN chmod +x gradlew
+
+# 🏗️ Build the app
 RUN ./gradlew build -x test
 
 # 🚀 Stage 2: Run the built jar
@@ -10,3 +15,4 @@ WORKDIR /app
 COPY --from=build /app/build/libs/laundary-backend-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
+
