@@ -2,12 +2,9 @@
 FROM gradle:8.4.0-jdk17 AS build
 WORKDIR /app
 COPY --chown=gradle:gradle . .
-
-# ✅ Make gradlew executable
-RUN chmod +x gradlew
-
-# 🏗️ Build the app
+RUN chmod +x ./gradlew
 RUN ./gradlew build -x test
+
 
 # 🚀 Stage 2: Run the built jar
 FROM eclipse-temurin:17-jdk
