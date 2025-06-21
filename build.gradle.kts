@@ -26,7 +26,15 @@ repositories {
 	google()
 }
 
+dependencyManagement {
+	imports {
+		mavenBom("org.mongodb:mongodb-driver-bom:5.5.1")
+	}
+}
+
+
 dependencies {
+
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-web")
@@ -44,7 +52,7 @@ dependencies {
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
-	implementation("org.mongodb:mongodb-driver-sync:5.5.1")
+	implementation("org.mongodb:mongodb-driver-sync")
 
 //	runtimeOnly("com.h2database:h2")
 }
