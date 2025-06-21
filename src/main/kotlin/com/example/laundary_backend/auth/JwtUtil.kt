@@ -10,18 +10,33 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
+import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Value
+import java.time.Clock
+import java.security.Key
 
 
 @Component
 class JwtUtil (
     @Value("\${jwt.secret}") private val secret: String,
     @Value("\${jwt.expiration}") private val accessTokenExpiration: Long,
-    @Value("\${jwt.refresh.expiration}") private val refreshTokenExpiration: Long
+    @Value("\${jwt.refresh.expiration}") private val refreshTokenExpiration: Long ,
+    private val clock: Clock = Clock.systemUTC()
 ){
 //    val secret = "YjNhNmEyMTQtNzU1Ni00M2MzLWI2ZmQtYzIxMjQ5ZDVmZGYy" ;
 
-    private val secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret))
+    private lateinit var secretKey: Key
+
+    @PostConstruct
+    fun init() {
+        secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret))
+
+        require(secretKey.encoded.size >= 32) {
+            "JWT secret must be at least 256 bits (32 bytes) for HS256"
+        }
+    }
+
+   // private val secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret))
 
     fun generateAccessToken(email: String, role: UserRole): String {
         return generateToken(email, role, accessTokenExpiration)
@@ -32,7 +47,7 @@ class JwtUtil (
     }
 
     private fun generateToken(email: String, role: UserRole?, expiration: Long): String {
-        val now = Date()
+        val now = Date.from(clock.instant())
         val expiryDate = Date(now.time + expiration)
 
         val builder = Jwts.builder()
@@ -41,7 +56,10 @@ class JwtUtil (
             .setExpiration(expiryDate)
             .signWith(secretKey, SignatureAlgorithm.HS256)
 
-        role?.let { builder.claim("role", it.name) } // Only include role in access token
+        role?.let {
+            builder.claim("role", it.name)
+            builder.claim("type", "access")
+        } ?: builder.claim("type", "refresh")
 
         return builder.compact()
     }
@@ -73,7 +91,10 @@ class JwtUtil (
                 .parseClaimsJws(token)
                 .body
         } catch (e: Exception) {
+            if (isDev()) e.printStackTrace()
             null // Return null if parsing fails
         }
     }
 }
+
+private fun isDev(): Boolean = System.getenv("SPRING_PROFILES_ACTIVE") == "dev"

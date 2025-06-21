@@ -3,8 +3,12 @@
 FROM gradle:8.4.0-jdk21 AS build
 WORKDIR /app
 COPY --chown=gradle:gradle . .
+
+# 🧼 Ensure gradlew has execute permission
 RUN chmod +x ./gradlew
-RUN ./gradlew build -x test
+
+# ✅ Use bootJar for correct Spring Boot output
+RUN ./gradlew bootJar -x test
 
 # 🚀 Stage 2: Run the built jar
 FROM eclipse-temurin:21-jdk
