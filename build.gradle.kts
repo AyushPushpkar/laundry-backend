@@ -44,6 +44,8 @@ dependencies {
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
+	implementation("org.mongodb:mongodb-driver-sync:5.5.1")
+
 //	runtimeOnly("com.h2database:h2")
 }
 
