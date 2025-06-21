@@ -22,7 +22,7 @@ RUN apt-get update && \
 
 COPY --from=build /app/build/libs/laundary-backend-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Dhttps.protocols=TLSv1.2", "-jar", "app.jar"]
 
 
 
